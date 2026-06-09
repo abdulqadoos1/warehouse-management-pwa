@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a56db">
+<title>Warehouse Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f4f6;color:#111827;font-size:14px;height:100vh;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto}
+.hdr{background:#1a56db;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.hdr-left h1{font-size:16px;font-weight:700}
+.hdr-left p{font-size:11px;opacity:0.8;margin-top:2px}
+.hdr-right{text-align:right}
+.hdr-right p{font-size:11px;opacity:0.8}
+.hdr-right h2{font-size:15px;font-weight:700}
+.body{flex:1;overflow-y:auto;padding:12px 12px 80px}
+.page{display:none}
+.page.on{display:block}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e5e7eb;display:flex;z-index:99}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px 10px;border:none;background:none;cursor:pointer;font-size:10px;color:#6b7280;gap:2px}
+.nb span.i{font-size:22px}
+.nb.on{color:#1a56db}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px}
+.ch{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.mbox{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px}
+.ml{font-size:11px;color:#6b7280;margin-bottom:3px}
+.mv{font-size:19px;font-weight:700}
+.blue{color:#1a56db}.green{color:#057a55}.red{color:#c81e1e}
+.tabs{display:flex;background:#f3f4f6;border-radius:6px;padding:3px;margin-bottom:12px;gap:2px}
+.tb{flex:1;padding:8px 4px;border:none;background:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;color:#6b7280}
+.tb.on{background:#fff;color:#1a56db;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.tp{display:none}
+.tp.on{display:block}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:12px;font-weight:600;color:#6b7280;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:14px;color:#111827;background:#fff;font-family:Arial,sans-serif;outline:none}
+.field input:focus,.field select:focus{border-color:#1a56db}
+.field textarea{height:65px;resize:none}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{width:100%;padding:12px;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.bp{background:#1a56db;color:#fff}
+.bg{background:#057a55;color:#fff}
+.bo{background:#fff;border:1.5px solid #e5e7eb;color:#111827}
+.br{background:#c81e1e;color:#fff}
+.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6}
+.row:last-child{border:none;padding-bottom:0}
+.rn{font-size:14px;font-weight:600}
+.rs{font-size:12px;color:#6b7280;margin-top:2px}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bgreen{background:#def7ec;color:#057a55}
+.bred{background:#fde8e8;color:#c81e1e}
+.bamber{background:#fef3c7;color:#92400e}
+.bblue{background:#ebf5ff;color:#1a56db}
+.sbar{height:5px;background:#f3f4f6;border-radius:3px;margin-top:4px;overflow:hidden}
+.sfill{height:100%;border-radius:3px;background:#057a55}
+.slow{background:#c81e1e}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
+.mbg.on{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto}
+.mt{font-size:16px;font-weight:700;margin-bottom:14px}
+.mc{float:right;background:#f3f4f6;border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;color:#6b7280;line-height:30px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+.tbl th{text-align:left;padding:5px 4px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:11px}
+.tbl td{padding:7px 4px;border-bottom:1px solid #f3f4f6}
+.tbl tr:last-child td{border:none}
+.totrow{background:#ebf5ff;border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;margin-top:8px}
+.pcrd{background:linear-gradient(135deg,#1a56db,#1e429f);color:#fff;border-radius:10px;padding:20px;margin-bottom:10px}
+.empty{text-align:center;padding:30px 20px;color:#6b7280}
+.ei{font-size:40px;display:block;margin-bottom:8px}
+.div{height:1px;background:#e5e7eb;margin:10px 0}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-right:10px}
+</style>
+<link rel="manifest" href="./manifest.json"><script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").then(function(){console.log("SW ok");}).catch(function(e){console.log("SW err",e);});});}</script></head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-left"><h1>🏭 Warehouse Pro</h1><p id="hdate"></p></div>
+    <div class="hdr-right"><p>Today Sales</p><h2 id="hsale">Rs. 0</h2></div>
+  </div>
+
+  <div class="body">
+
+    <!-- DASHBOARD -->
+    <div id="p-dash" class="page on">
+      <div class="grid2">
+        <div class="mbox"><div class="ml">Today Sales</div><div class="mv blue" id="d-sale">Rs. 0</div></div>
+        <div class="mbox"><div class="ml">Today Profit</div><div class="mv green" id="d-profit">Rs. 0</div></div>
+        <div class="mbox"><div class="ml">Credit Due</div><div class="mv red" id="d-credit">Rs. 0</div></div>
+        <div class="mbox"><div class="ml">Invoices Today</div><div class="mv" id="d-invn">0</div></div>
+      </div>
+      <div class="card" id="d-low-card" style="display:none">
+        <div class="ch">⚠️ Low Stock</div>
+        <div id="d-low"></div>
+      </div>
+      <div class="card">
+        <div class="ch" style="display:flex;justify-content:space-between"><span>Recent Invoices</span><span class="badge bblue" id="d-invtot">0 total</span></div>
+        <div id="d-invs"><div class="empty"><span class="ei">🧾</span>No invoices yet</div></div>
+      </div>
+      <div class="card">
+        <div class="ch">💳 Pending Credits</div>
+        <div id="d-creds"><div class="empty"><span class="ei">✅</span>No pending credits</div></div>
+      </div>
+    </div>
+
+    <!-- INVOICE -->
+    <div id="p-invoice" class="page">
+      <div class="tabs">
+        <button class="tb on" onclick="tab('inv','new',this)">New Invoice</button>
+        <button class="tb" onclick="tab('inv','list',this)">All Invoices</button>
+      </div>
+      <div id="inv-new" class="tp on">
+        <div class="card">
+          <div class="ch">Invoice Details</div>
+          <div class="field"><label>Customer *</label><select id="ic"></select></div>
+          <div class="r2">
+            <div class="field"><label>Invoice No.</label><input id="inum" readonly></div>
+            <div class="field"><label>Date</label><input type="date" id="idate"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">Add Items</div>
+          <div class="field"><label>Product *</label><select id="iprod" onchange="prodSel()"></select></div>
+          <div class="r2">
+            <div class="field"><label>Quantity *</label><input type="number" id="iqty" placeholder="0" oninput="calcLine()"></div>
+            <div class="field"><label>Sale Price (Rs.)</label><input type="number" id="iprice" placeholder="0" oninput="calcLine()"></div>
+          </div>
+          <div id="iprev" style="display:none;background:#ebf5ff;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:13px;color:#1e429f;font-weight:600"></div>
+          <button class="btn bo" onclick="addItem()">+ Add Item</button>
+          <div id="ilist"></div>
+          <div class="totrow"><span style="font-weight:700;color:#1e429f">Grand Total</span><span style="font-size:18px;font-weight:700;color:#1a56db" id="itotal">Rs. 0</span></div>
+        </div>
+        <div class="card">
+          <div class="ch">Payment</div>
+          <div class="r2">
+            <div class="field"><label>Amount Paid (Rs.)</label><input type="number" id="ipaid" placeholder="0" oninput="calcBal()"></div>
+            <div class="field"><label>Balance / Credit</label><input type="number" id="ibal" readonly style="background:#f3f4f6"></div>
+          </div>
+          <div class="field"><label>Note</label><textarea id="inote" placeholder="Optional..."></textarea></div>
+        </div>
+        <button class="btn bp" onclick="saveInv()">💾 Save Invoice</button>
+      </div>
+      <div id="inv-list" class="tp"><div id="inv-list-c"></div></div>
+    </div>
+
+    <!-- STOCK -->
+    <div id="p-stock" class="page">
+      <div class="grid2">
+        <div class="mbox"><div class="ml">Products</div><div class="mv" id="sk-cnt">0</div></div>
+        <div class="mbox"><div class="ml">Stock Value</div><div class="mv blue" id="sk-val">Rs. 0</div></div>
+      </div>
+      <div class="tabs">
+        <button class="tb on" onclick="tab('stk','list',this)">View Stock</button>
+        <button class="tb" onclick="tab('stk','add',this)">Add Product</button>
+        <button class="tb" onclick="tab('stk','adj',this)">Adjust</button>
+      </div>
+      <div id="stk-list" class="tp on"><div class="card" id="stk-list-c"></div></div>
+      <div id="stk-add" class="tp">
+        <div class="card">
+          <div class="ch">Add New Product</div>
+          <div class="field"><label>Product Name *</label><input id="pn" placeholder="e.g. Cement 50kg"></div>
+          <div class="r2">
+            <div class="field"><label>Unit</label><select id="pu"><option>bags</option><option>pcs</option><option>tons</option><option>liters</option><option>feet</option><option>meters</option><option>kgs</option><option>boxes</option></select></div>
+            <div class="field"><label>Opening Qty</label><input type="number" id="pq" placeholder="0"></div>
+          </div>
+          <div class="r2">
+            <div class="field"><label>Cost Price (Rs.) *</label><input type="number" id="pc" placeholder="0"></div>
+            <div class="field"><label>Sale Price (Rs.) *</label><input type="number" id="ps" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Low Stock Alert</label><input type="number" id="pa" placeholder="10"></div>
+          <button class="btn bp" onclick="saveProd()">✅ Save Product</button>
+        </div>
+      </div>
+      <div id="stk-adj" class="tp">
+        <div class="card">
+          <div class="ch">Stock Adjustment</div>
+          <div class="field"><label>Product *</label><select id="aj-p"></select></div>
+          <div class="field"><label>Type</label><select id="aj-t"><option value="add">Add Stock (Purchase)</option><option value="rem">Remove (Loss/Return)</option></select></div>
+          <div class="r2">
+            <div class="field"><label>Quantity *</label><input type="number" id="aj-q" placeholder="0"></div>
+            <div class="field"><label>New Cost (optional)</label><input type="number" id="aj-c" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Reason</label><input id="aj-n" placeholder="e.g. New shipment"></div>
+          <button class="btn bg" onclick="adjStock()">✅ Update Stock</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFIT -->
+    <div id="p-profit" class="page">
+      <div class="pcrd">
+        <div style="font-size:12px;opacity:.8">Today's Net Profit</div>
+        <div style="font-size:30px;font-weight:700;margin:6px 0" id="pr-td">Rs. 0</div>
+        <div style="display:flex;gap:20px">
+          <div><div style="font-size:11px;opacity:.8">Sales</div><div style="font-size:14px;font-weight:700" id="pr-sl">Rs. 0</div></div>
+          <div><div style="font-size:11px;opacity:.8">Cost</div><div style="font-size:14px;font-weight:700" id="pr-cs">Rs. 0</div></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tb on" onclick="tab('prf','today',this)">Today</button>
+        <button class="tb" onclick="tab('prf','week',this)">This Week</button>
+        <button class="tb" onclick="tab('prf','all',this)">All Time</button>
+      </div>
+      <div id="prf-today" class="tp on"><div class="card" id="prf-td-c"></div></div>
+      <div id="prf-week" class="tp"><div class="card" id="prf-wk-c"></div></div>
+      <div id="prf-all" class="tp"><div class="card" id="prf-al-c"></div></div>
+    </div>
+
+    <!-- CREDIT -->
+    <div id="p-credit" class="page">
+      <div class="grid2">
+        <div class="mbox"><div class="ml">Outstanding</div><div class="mv red" id="cr-out">Rs. 0</div></div>
+        <div class="mbox"><div class="ml">Recovered</div><div class="mv green" id="cr-rec">Rs. 0</div></div>
+      </div>
+      <div class="tabs">
+        <button class="tb on" onclick="tab('cr','list',this)">Credit List</button>
+        <button class="tb" onclick="tab('cr','add',this)">New Entry</button>
+        <button class="tb" onclick="tab('cr','pay',this)">Receive</button>
+      </div>
+      <div id="cr-list" class="tp on"><div class="card" id="cr-list-c"></div></div>
+      <div id="cr-add" class="tp">
+        <div class="card">
+          <div class="ch">Direct Credit Entry</div>
+          <div class="field"><label>Customer *</label><select id="cr-c"></select></div>
+          <div class="field"><label>Amount (Rs.) *</label><input type="number" id="cr-a" placeholder="0"></div>
+          <div class="r2">
+            <div class="field"><label>Date</label><input type="date" id="cr-d"></div>
+            <div class="field"><label>Due Date</label><input type="date" id="cr-dd"></div>
+          </div>
+          <div class="field"><label>Description</label><input id="cr-n" placeholder="e.g. Previous balance"></div>
+          <button class="btn bp" onclick="saveCr()">💾 Save Entry</button>
+        </div>
+      </div>
+      <div id="cr-pay" class="tp">
+        <div class="card">
+          <div class="ch">Receive Payment</div>
+          <div class="field"><label>Customer *</label><select id="py-c" onchange="showBal()"></select></div>
+          <div id="py-bal" style="display:none;padding:8px 12px;border-radius:6px;margin-bottom:10px;font-size:13px;font-weight:700"></div>
+          <div class="field"><label>Amount Received *</label><input type="number" id="py-a" placeholder="0"></div>
+          <div class="field"><label>Method</label><select id="py-m"><option>Cash</option><option>JazzCash</option><option>EasyPaisa</option><option>Bank Transfer</option><option>Cheque</option></select></div>
+          <button class="btn bg" onclick="recvPay()">✅ Record Payment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div id="p-cust" class="page">
+      <div class="tabs">
+        <button class="tb on" onclick="tab('cu','list',this)">All Customers</button>
+        <button class="tb" onclick="tab('cu','add',this)">Add Customer</button>
+      </div>
+      <div id="cu-list" class="tp on"><div class="card" id="cu-list-c"></div></div>
+      <div id="cu-add" class="tp">
+        <div class="card">
+          <div class="ch">Add New Customer</div>
+          <div class="field"><label>Business Name *</label><input id="cb" placeholder="e.g. Ali Traders"></div>
+          <div class="field"><label>Owner Name</label><input id="cn" placeholder="e.g. Muhammad Ali"></div>
+          <div class="field"><label>Mobile Number *</label><input type="tel" id="cp" placeholder="0300-0000000"></div>
+          <div class="r2">
+            <div class="field"><label>City</label><input id="cc" placeholder="Lahore"></div>
+            <div class="field"><label>Opening Balance</label><input type="number" id="cd" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Address</label><textarea id="ca" placeholder="Street, Area"></textarea></div>
+          <button class="btn bp" onclick="saveCust()">✅ Save Customer</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end body -->
+
+  <nav class="nav">
+    <button class="nb on" onclick="go('dash',this)"><span class="i">🏠</span><span>Home</span></button>
+    <button class="nb" onclick="go('invoice',this)"><span class="i">🧾</span><span>Invoice</span></button>
+    <button class="nb" onclick="go('stock',this)"><span class="i">📦</span><span>Stock</span></button>
+    <button class="nb" onclick="go('profit',this)"><span class="i">📊</span><span>Profit</span></button>
+    <button class="nb" onclick="go('credit',this)"><span class="i">💳</span><span>Credit</span></button>
+    <button class="nb" onclick="go('cust',this)"><span class="i">👥</span><span>Customers</span></button>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div class="mbg" id="m1">
+  <div class="modal">
+    <button class="mc" onclick="cm('m1')">✕</button>
+    <div class="mt">Invoice Detail</div>
+    <div id="m1b"></div>
+    <button class="btn bo" style="margin-top:8px" onclick="printInv()">🖨️ Print</button>
+    <button class="btn br" onclick="delInv()">🗑️ Delete</button>
+  </div>
+</div>
+<div class="mbg" id="m2">
+  <div class="modal">
+    <button class="mc" onclick="cm('m2')">✕</button>
+    <div class="mt" id="m2t"></div>
+    <div id="m2b"></div>
+    <button class="btn bo" style="margin-top:8px" onclick="editProd()">✏️ Update Prices</button>
+    <button class="btn br" onclick="delProd()">🗑️ Delete Product</button>
+  </div>
+</div>
+<div class="mbg" id="m3">
+  <div class="modal">
+    <button class="mc" onclick="cm('m3')">✕</button>
+    <div class="mt" id="m3t"></div>
+    <div id="m3b"></div>
+    <button class="btn br" style="margin-top:8px" onclick="delCust()">🗑️ Delete Customer</button>
+  </div>
+</div>
+<div class="toast" id="tst"></div>
+
+<script>
+// DATA
+var D = {
+  get: function(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } },
+  set: function(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
+  custs: function(){ return this.get('custs')||[]; },
+  prods: function(){ return this.get('prods')||[]; },
+  invs:  function(){ return this.get('invs')||[];  },
+  crs:   function(){ return this.get('crs')||[];   },
+  nn:    function(){ var n=this.get('nn')||1; this.set('nn',n+1); return 'INV-'+('000'+n).slice(-4); }
+};
+
+var ITEMS = [];
+var CUR_INV=null, CUR_PROD=null, CUR_CUST=null;
+var TODAY = new Date().toISOString().slice(0,10);
+var COLORS = ['#1a56db','#057a55','#c81e1e','#92400e','#6d28d9','#0e7490'];
+
+function Rs(n){ return 'Rs. '+(Number(n)||0).toLocaleString('en'); }
+function $(id){ return document.getElementById(id); }
+function toast(m){ var t=$('tst'); t.textContent=m; t.className='toast on'; setTimeout(function(){ t.className='toast'; },2500); }
+function cm(id){ $(id).className='mbg'; }
+function om(id){ $(id).className='mbg on'; }
+function ini(s){ return (s||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2); }
+function clr(s){ var h=0; for(var i=0;i<s.length;i++) h=((h<<5)-h)+s.charCodeAt(i); return COLORS[Math.abs(h)%COLORS.length]; }
+function dl(d){ if(d===TODAY)return 'Today'; var diff=Math.round((new Date(TODAY)-new Date(d))/86400000); if(diff===1)return 'Yesterday'; if(diff<7)return diff+' days ago'; return d; }
+
+// NAV
+function go(id, btn){
+  var pages = document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++) pages[i].className='page';
+  var btns = document.querySelectorAll('.nb');
+  for(var i=0;i<btns.length;i++) btns[i].className='nb';
+  $('p-'+id).className='page on';
+  btn.className='nb on';
+  if(id==='dash') rDash();
+  if(id==='invoice'){ rInvForm(); rInvList(); }
+  if(id==='stock') rStock();
+  if(id==='profit') rProfit();
+  if(id==='credit') rCredit();
+  if(id==='cust') rCusts();
+}
+
+// TABS
+function tab(pre, name, btn){
+  var allNames = ['new','list','add','adj','pay','today','week','all'];
+  for(var i=0;i<allNames.length;i++){
+    var el = $(pre+'-'+allNames[i]);
+    if(el) el.className='tp';
+  }
+  var target = $(pre+'-'+name);
+  if(target) target.className='tp on';
+  var tbs = btn.closest('.tabs').querySelectorAll('.tb');
+  for(var i=0;i<tbs.length;i++) tbs[i].className='tb';
+  btn.className='tb on';
+  if(pre==='stk' && name==='adj') fillAdjProd();
+  if(pre==='inv' && name==='list') rInvList();
+  if(pre==='stk' && name==='list') rStock();
+  if(pre==='cr'  && name==='list') rCredit();
+  if(pre==='prf') rProfit();
+  if(pre==='cu'  && name==='list') rCusts();
+}
+
+// DASHBOARD
+function rDash(){
+  var invs=D.invs(), crs=D.crs(), prods=D.prods(), custs=D.custs();
+  var ti=invs.filter(function(i){return i.date===TODAY;});
+  var sale=0,profit=0;
+  for(var i=0;i<ti.length;i++){ sale+=ti[i].total; profit+=ti[i].profit; }
+  var pend=crs.filter(function(c){return !c.paid;});
+  var debt=0; for(var i=0;i<pend.length;i++) debt+=pend[i].amount;
+
+  $('hsale').textContent=Rs(sale);
+  $('hdate').textContent=new Date().toDateString();
+  $('d-sale').textContent=Rs(sale);
+  $('d-profit').textContent=Rs(profit);
+  $('d-credit').textContent=Rs(debt);
+  $('d-invn').textContent=ti.length;
+  $('d-invtot').textContent=invs.length+' total';
+
+  var low=prods.filter(function(p){return p.qty<=(p.al||10);});
+  if(low.length>0){
+    $('d-low-card').style.display='block';
+    var h='';
+    for(var i=0;i<low.length;i++) h+='<div class="row"><div><div class="rn">'+low[i].nm+'</div><div class="rs">Only '+low[i].qty+' '+low[i].un+' left</div></div><span class="badge bred">Low</span></div>';
+    $('d-low').innerHTML=h;
+  } else $('d-low-card').style.display='none';
+
+  var recent=invs.slice(-5).reverse();
+  if(recent.length===0){ $('d-invs').innerHTML='<div class="empty"><span class="ei">🧾</span>No invoices yet</div>'; }
+  else {
+    var h='';
+    for(var i=0;i<recent.length;i++){
+      var inv=recent[i];
+      var c=null; for(var j=0;j<custs.length;j++){if(custs[j].id===inv.cid){c=custs[j];break;}} if(!c)c={biz:'Unknown'};
+      var pd=inv.bal<=0;
+      h+='<div class="row" style="cursor:pointer" onclick="showInv(\''+inv.id+'\')"><div><div class="rn">'+c.biz+'</div><div class="rs">'+inv.id+' • '+dl(inv.date)+'</div></div><div style="text-align:right"><div style="font-weight:700">'+Rs(inv.total)+'</div><span class="badge '+(pd?'bgreen':'bamber')+'">'+(pd?'Paid':'Credit')+'</span></div></div>';
+    }
+    $('d-invs').innerHTML=h;
+  }
+
+  if(pend.length===0){ $('d-creds').innerHTML='<div class="empty"><span class="ei">✅</span>No pending credits</div>'; }
+  else {
+    var h=''; var p4=pend.slice(-4).reverse();
+    for(var i=0;i<p4.length;i++){
+      var cr=p4[i];
+      var c=null; for(var j=0;j<custs.length;j++){if(custs[j].id===cr.cid){c=custs[j];break;}} if(!c)c={biz:'Unknown'};
+      h+='<div class="row"><div><div class="rn">'+c.biz+'</div><div class="rs">'+(cr.note||'')+'</div></div><div style="font-weight:700;color:#c81e1e">'+Rs(cr.amount)+'</div></div>';
+    }
+    $('d-creds').innerHTML=h;
+  }
+}
+
+// INVOICE FORM
+function rInvForm(){
+  var custs=D.custs(), prods=D.prods();
+  var h='<option value="">-- Select Customer --</option>';
+  for(var i=0;i<custs.length;i++) h+='<option value="'+custs[i].id+'">'+custs[i].biz+'</option>';
+  $('ic').innerHTML=h;
+  h='<option value="">-- Select Product --</option>';
+  for(var i=0;i<prods.length;i++) h+='<option value="'+prods[i].id+'">'+prods[i].nm+' ('+prods[i].qty+' '+prods[i].un+') — '+Rs(prods[i].sl)+'</option>';
+  $('iprod').innerHTML=h;
+  var nn=D.get('nn')||1;
+  $('inum').value='INV-'+('000'+nn).slice(-4);
+  $('idate').value=TODAY;
+  ITEMS=[]; rItems();
+  $('ipaid').value=''; $('ibal').value=''; $('inote').value='';
+}
+
+function prodSel(){
+  var prods=D.prods(), id=$('iprod').value;
+  var p=null; for(var i=0;i<prods.length;i++){if(prods[i].id===id){p=prods[i];break;}}
+  if(p){ $('iprice').value=p.sl; $('iqty').value=''; calcLine(); }
+}
+
+function calcLine(){
+  var q=parseFloat($('iqty').value)||0, pr=parseFloat($('iprice').value)||0;
+  var pv=$('iprev');
+  if(q>0&&pr>0){ pv.style.display='block'; pv.textContent=q+' × '+Rs(pr)+' = '+Rs(q*pr); }
+  else pv.style.display='none';
+}
+
+function addItem(){
+  var pid=$('iprod').value, q=parseFloat($('iqty').value)||0, pr=parseFloat($('iprice').value)||0;
+  if(!pid){toast('⚠️ Select a product');return;}
+  if(q<=0){toast('⚠️ Enter quantity');return;}
+  if(pr<=0){toast('⚠️ Enter sale price');return;}
+  var prods=D.prods(), p=null;
+  for(var i=0;i<prods.length;i++){if(prods[i].id===pid){p=prods[i];break;}}
+  if(!p)return;
+  if(q>p.qty){toast('⚠️ Only '+p.qty+' '+p.un+' in stock!');return;}
+  var ex=-1; for(var i=0;i<ITEMS.length;i++){if(ITEMS[i].pid===pid){ex=i;break;}}
+  if(ex>=0){ITEMS[ex].q+=q; ITEMS[ex].tot=ITEMS[ex].q*ITEMS[ex].pr;}
+  else ITEMS.push({pid:pid,nm:p.nm,un:p.un,q:q,pr:pr,cost:p.co,tot:q*pr,ctot:q*p.co});
+  rItems();
+  $('iprod').value=''; $('iqty').value=''; $('iprice').value='';
+  $('iprev').style.display='none';
+  toast('✅ Item added');
+}
+
+function rItems(){
+  var grand=0; for(var i=0;i<ITEMS.length;i++) grand+=ITEMS[i].tot;
+  $('itotal').textContent=Rs(grand);
+  if(ITEMS.length===0){$('ilist').innerHTML=''; calcBal(); return;}
+  var h='<table class="tbl"><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr>';
+  for(var i=0;i<ITEMS.length;i++){
+    var it=ITEMS[i];
+    h+='<tr><td>'+it.nm+'</td><td>'+it.q+' '+it.un+'</td><td>'+Rs(it.pr)+'</td><td><b>'+Rs(it.tot)+'</b></td><td><button onclick="rmItem('+i+')" style="background:none;border:none;color:#c81e1e;font-size:16px;cursor:pointer">🗑</button></td></tr>';
+  }
+  $('ilist').innerHTML=h+'</table>';
+  calcBal();
+}
+
+function rmItem(i){ITEMS.splice(i,1);rItems();}
+
+function calcBal(){
+  var grand=0; for(var i=0;i<ITEMS.length;i++) grand+=ITEMS[i].tot;
+  var paid=parseFloat($('ipaid').value)||0;
+  $('ibal').value=Math.max(0,grand-paid);
+}
+
+function saveInv(){
+  var cid=$('ic').value, paid=parseFloat($('ipaid').value)||0, note=$('inote').value;
+  if(!cid){toast('⚠️ Select a customer');return;}
+  if(ITEMS.length===0){toast('⚠️ Add at least one item');return;}
+  var total=0,profit=0;
+  for(var i=0;i<ITEMS.length;i++){total+=ITEMS[i].tot; profit+=(ITEMS[i].tot-ITEMS[i].ctot);}
+  var bal=Math.max(0,total-paid);
+  var id=D.nn();
+  var inv={id:id,cid:cid,date:TODAY,items:JSON.parse(JSON.stringify(ITEMS)),total:total,paid:paid,bal:bal,profit:profit,note:note};
+  var prods=D.prods();
+  for(var i=0;i<ITEMS.length;i++){
+    for(var j=0;j<prods.length;j++){if(prods[j].id===ITEMS[i].pid){prods[j].qty=Math.max(0,prods[j].qty-ITEMS[i].q);break;}}
+  }
+  D.set('prods',prods);
+  var invs=D.invs(); invs.push(inv); D.set('invs',invs);
+  if(bal>0){
+    var crs=D.crs();
+    crs.push({id:'CR'+Date.now(),cid:cid,amount:bal,date:TODAY,note:'Invoice '+id,paid:false});
+    D.set('crs',crs);
+  }
+  toast('✅ '+id+' saved!');
+  rInvForm(); rDash();
+}
+
+function rInvList(){
+  var invs=D.invs().slice().reverse(), custs=D.custs();
+  if(invs.length===0){$('inv-list-c').innerHTML='<div class="card"><div class="empty"><span class="ei">🧾</span>No invoices</div></div>';return;}
+  var h='<div class="card">';
+  for(var i=0;i<invs.length;i++){
+    var inv=invs[i];
+    var c=null; for(var j=0;j<custs.length;j++){if(custs[j].id===inv.cid){c=custs[j];break;}} if(!c)c={biz:'Unknown'};
+    var pd=inv.bal<=0;
+    h+='<div class="row" style="cursor:pointer" onclick="showInv(\''+inv.id+'\')"><div><div class="rn">'+inv.id+' — '+c.biz+'</div><div class="rs">'+dl(inv.date)+' • Profit: '+Rs(inv.profit)+'</div></div><div style="text-align:right"><div style="font-weight:700">'+Rs(inv.total)+'</div><span class="badge '+(pd?'bgreen':'bamber')+'">'+(pd?'Paid':'Credit')+'</span></div></div>';
+  }
+  $('inv-list-c').innerHTML=h+'</div>';
+}
+
+function showInv(id){
+  CUR_INV=id;
+  var invs=D.invs(), inv=null; for(var i=0;i<invs.length;i++){if(invs[i].id===id){inv=invs[i];break;}} if(!inv)return;
+  var custs=D.custs(), c=null; for(var i=0;i<custs.length;i++){if(custs[i].id===inv.cid){c=custs[i];break;}} if(!c)c={biz:'Unknown'};
+  var pd=inv.bal<=0;
+  var h='<div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><b style="font-size:16px">'+inv.id+'</b><br><span style="color:#6b7280;font-size:13px">'+inv.date+'</span></div><span class="badge '+(pd?'bgreen':'bamber')+'">'+(pd?'Fully Paid':'Pending')+'</span></div>';
+  h+='<div style="background:#ebf5ff;border-radius:6px;padding:10px 12px;margin-bottom:12px"><div style="font-size:12px;color:#6b7280">Customer</div><div style="font-weight:700;font-size:15px">'+c.biz+'</div>'+(c.ph?'<div style="font-size:12px;color:#6b7280">'+c.ph+'</div>':'')+'</div>';
+  h+='<table class="tbl"><tr><th>Product</th><th>Qty</th><th>Price</th><th>Amount</th></tr>';
+  for(var i=0;i<inv.items.length;i++){var it=inv.items[i]; h+='<tr><td>'+it.nm+'</td><td>'+it.q+' '+it.un+'</td><td>'+Rs(it.pr)+'</td><td><b>'+Rs(it.tot)+'</b></td></tr>';}
+  h+='</table><div class="div"></div>';
+  h+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#6b7280">Total</span><b>'+Rs(inv.total)+'</b></div>';
+  h+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#6b7280">Paid</span><b style="color:#057a55">'+Rs(inv.paid)+'</b></div>';
+  h+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#6b7280">Balance</span><b style="color:#c81e1e">'+Rs(inv.bal)+'</b></div>';
+  h+='<div style="display:flex;justify-content:space-between"><span style="color:#6b7280">Profit</span><b style="color:#057a55">'+Rs(inv.profit)+'</b></div>';
+  if(inv.note) h+='<div class="div"></div><div style="font-size:13px;color:#6b7280">Note: '+inv.note+'</div>';
+  $('m1b').innerHTML=h; om('m1');
+}
+
+function printInv(){
+  var invs=D.invs(), inv=null; for(var i=0;i<invs.length;i++){if(invs[i].id===CUR_INV){inv=invs[i];break;}} if(!inv)return;
+  var custs=D.custs(), c=null; for(var i=0;i<custs.length;i++){if(custs[i].id===inv.cid){c=custs[i];break;}} if(!c)c={biz:'Unknown'};
+  var rows=''; for(var i=0;i<inv.items.length;i++){var it=inv.items[i]; rows+='<tr><td>'+it.nm+'</td><td>'+it.q+' '+it.un+'</td><td>Rs.'+it.pr.toLocaleString()+'</td><td>Rs.'+it.tot.toLocaleString()+'</td></tr>';}
+  var w=window.open('','_blank');
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+inv.id+'</title>';
+  html += '<style>body{font-family:Arial;padding:20px;max-width:400px;margin:0 auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;text-align:left}th{background:#f3f4f6}.d{border-top:1px dashed #999;margin:10px 0}</style></head>';
+  html += '<body><h2 style="text-align:center;color:#1a56db">Warehouse Pro</h2>';
+  html += '<p><b>'+inv.id+'</b> | '+inv.date+'</p><p>Customer: <b>'+c.biz+'</b></p>';
+  html += '<div class="d"></div>';
+  html += '<table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Amount</th></tr>'+rows+'</table>';
+  html += '<div class="d"></div>';
+  html += '<p>Total: <b>Rs.'+inv.total.toLocaleString()+'</b></p>';
+  html += '<p>Paid: Rs.'+inv.paid.toLocaleString()+'</p>';
+  html += '<p>Balance: Rs.'+inv.bal.toLocaleString()+'</p>';
+  html += '<p>Profit: Rs.'+inv.profit.toLocaleString()+'</p>';
+  html += '<div class="d"></div><p style="text-align:center;color:#999">Thank you!</p></body></html>';
+  w.document.write(html);
+  w.document.close(); w.print();
+}
+
+function delInv(){
+  if(!confirm('Delete this invoice?'))return;
+  var invs=D.invs().filter(function(i){return i.id!==CUR_INV;}); D.set('invs',invs);
+  cm('m1'); rInvList(); rDash(); toast('🗑️ Deleted');
+}
+
+// STOCK
+function rStock(){
+  var prods=D.prods();
+  var val=0; for(var i=0;i<prods.length;i++) val+=prods[i].qty*prods[i].co;
+  $('sk-cnt').textContent=prods.length;
+  $('sk-val').textContent=Rs(val);
+  if(prods.length===0){$('stk-list-c').innerHTML='<div class="empty"><span class="ei">📦</span>No products yet</div>';return;}
+  var maxQ=1; for(var i=0;i<prods.length;i++) if(prods[i].qty>maxQ) maxQ=prods[i].qty;
+  var h='';
+  for(var i=0;i<prods.length;i++){
+    var p=prods[i], pct=Math.round((p.qty/maxQ)*100), low=p.qty<=(p.al||10);
+    h+='<div class="row" style="cursor:pointer" onclick="showProd(\''+p.id+'\')"><div style="flex:1;min-width:0"><div class="rn">'+p.nm+'</div><div class="rs">Cost: '+Rs(p.co)+' | Sale: '+Rs(p.sl)+' | Profit: '+Rs(p.sl-p.co)+'/'+p.un+'</div><div class="sbar"><div class="sfill'+(low?' slow':'')+'" style="width:'+pct+'%"></div></div></div><div style="text-align:right;margin-left:8px"><div style="font-weight:700;font-size:16px;color:'+(low?'#c81e1e':'#111827')+'">'+p.qty+'</div><div style="font-size:11px;color:#6b7280">'+p.un+'</div>'+(low?'<span class="badge bred" style="font-size:10px">Low</span>':'')+'</div></div>';
+  }
+  $('stk-list-c').innerHTML=h;
+}
+
+function saveProd(){
+  var nm=$('pn').value.trim(), un=$('pu').value, qty=parseFloat($('pq').value)||0;
+  var co=parseFloat($('pc').value)||0, sl=parseFloat($('ps').value)||0, al=parseFloat($('pa').value)||10;
+  if(!nm){toast('⚠️ Enter product name');return;}
+  if(co<=0||sl<=0){toast('⚠️ Enter cost & sale price');return;}
+  var prods=D.prods();
+  for(var i=0;i<prods.length;i++){if(prods[i].nm.toLowerCase()===nm.toLowerCase()){toast('⚠️ Product already exists');return;}}
+  prods.push({id:'P'+Date.now(),nm:nm,un:un,qty:qty,co:co,sl:sl,al:al});
+  D.set('prods',prods);
+  $('pn').value=''; $('pq').value=''; $('pc').value=''; $('ps').value=''; $('pa').value='';
+  toast('✅ Product saved!'); rStock();
+}
+
+function showProd(id){
+  CUR_PROD=id;
+  var prods=D.prods(), p=null; for(var i=0;i<prods.length;i++){if(prods[i].id===id){p=prods[i];break;}} if(!p)return;
+  var sold=0; var invs=D.invs();
+  for(var i=0;i<invs.length;i++){for(var j=0;j<invs[i].items.length;j++){if(invs[i].items[j].pid===id){sold+=invs[i].items[j].q;break;}}}
+  $('m2t').textContent=p.nm;
+  $('m2b').innerHTML='<div class="grid2" style="margin-bottom:12px"><div class="mbox"><div class="ml">In Stock</div><div class="mv">'+p.qty+' '+p.un+'</div></div><div class="mbox"><div class="ml">Total Sold</div><div class="mv blue">'+sold+' '+p.un+'</div></div><div class="mbox"><div class="ml">Cost Price</div><div class="mv">'+Rs(p.co)+'</div></div><div class="mbox"><div class="ml">Sale Price</div><div class="mv green">'+Rs(p.sl)+'</div></div></div><div style="background:#def7ec;border-radius:6px;padding:10px 12px"><div style="font-size:12px;color:#6b7280">Profit per '+p.un+'</div><div style="font-size:20px;font-weight:700;color:#057a55">'+Rs(p.sl-p.co)+'</div></div>';
+  om('m2');
+}
+
+function editProd(){
+  var prods=D.prods(), p=null; for(var i=0;i<prods.length;i++){if(prods[i].id===CUR_PROD){p=prods[i];break;}} if(!p)return;
+  var nc=prompt('New Cost Price (current: '+p.co+'):',p.co);
+  var ns=prompt('New Sale Price (current: '+p.sl+'):',p.sl);
+  if(nc===null||ns===null)return;
+  for(var i=0;i<prods.length;i++){if(prods[i].id===CUR_PROD){prods[i].co=parseFloat(nc)||p.co; prods[i].sl=parseFloat(ns)||p.sl; break;}}
+  D.set('prods',prods); toast('✅ Prices updated'); cm('m2'); rStock();
+}
+
+function delProd(){
+  if(!confirm('Delete product?'))return;
+  D.set('prods',D.prods().filter(function(p){return p.id!==CUR_PROD;}));
+  cm('m2'); rStock(); toast('🗑️ Deleted');
+}
+
+function fillAdjProd(){
+  var prods=D.prods();
+  var h='<option value="">-- Select Product --</option>';
+  for(var i=0;i<prods.length;i++) h+='<option value="'+prods[i].id+'">'+prods[i].nm+' ('+prods[i].qty+' '+prods[i].un+')</option>';
+  $('aj-p').innerHTML=h;
+}
+
+function adjStock(){
+  var pid=$('aj-p').value, type=$('aj-t').value, q=parseFloat($('aj-q').value)||0, nc=parseFloat($('aj-c').value)||0;
+  if(!pid){toast('⚠️ Select product');return;} if(q<=0){toast('⚠️ Enter quantity');return;}
+  var prods=D.prods();
+  for(var i=0;i<prods.length;i++){
+    if(prods[i].id===pid){
+      if(type==='add'){prods[i].qty+=q; if(nc>0)prods[i].co=nc;}
+      else{if(q>prods[i].qty){toast('⚠️ Not enough stock');return;} prods[i].qty-=q;}
+      break;
+    }
+  }
+  D.set('prods',prods);
+  $('aj-q').value=''; $('aj-c').value=''; $('aj-n').value=''; $('aj-p').value='';
+  toast('✅ Stock updated!'); rStock();
+}
+
+// PROFIT
+function rProfit(){
+  var invs=D.invs(), custs=D.custs();
+  var ti=invs.filter(function(i){return i.date===TODAY;});
+  var sale=0,cost=0,profit=0;
+  for(var i=0;i<ti.length;i++){
+    sale+=ti[i].total; profit+=ti[i].profit;
+    for(var j=0;j<ti[i].items.length;j++) cost+=ti[i].items[j].ctot;
+  }
+  $('pr-td').textContent=Rs(profit); $('pr-sl').textContent=Rs(sale); $('pr-cs').textContent=Rs(cost);
+
+  function row(inv){
+    var c=null; for(var j=0;j<custs.length;j++){if(custs[j].id===inv.cid){c=custs[j];break;}} if(!c)c={biz:'Unknown'};
+    var mg=inv.total>0?Math.round((inv.profit/inv.total)*100):0;
+    return '<div class="row"><div><div class="rn">'+inv.id+' — '+c.biz+'</div><div class="rs">'+dl(inv.date)+' • Margin '+mg+'%</div></div><div style="text-align:right"><div style="font-weight:700">'+Rs(inv.total)+'</div><div style="font-size:12px;font-weight:700;color:#057a55">'+Rs(inv.profit)+'</div></div></div>';
+  }
+
+  $('prf-td-c').innerHTML=ti.length===0?'<div class="empty"><span class="ei">📊</span>No invoices today</div>':ti.slice().reverse().map(row).join('');
+
+  var ws=new Date(TODAY); ws.setDate(ws.getDate()-7); var wstr=ws.toISOString().slice(0,10);
+  var wi=invs.filter(function(i){return i.date>=wstr;});
+  var ws2=0,wp=0; for(var i=0;i<wi.length;i++){ws2+=wi[i].total;wp+=wi[i].profit;}
+  $('prf-wk-c').innerHTML='<div style="background:#def7ec;border-radius:6px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between"><div><div style="font-size:11px;color:#6b7280">Sales</div><div style="font-weight:700">'+Rs(ws2)+'</div></div><div><div style="font-size:11px;color:#6b7280">Profit</div><div style="font-weight:700;color:#057a55">'+Rs(wp)+'</div></div></div>'+(wi.length===0?'<div class="empty"><span class="ei">📊</span>No invoices this week</div>':wi.slice().reverse().map(row).join(''));
+
+  var as=0,ap=0; for(var i=0;i<invs.length;i++){as+=invs[i].total;ap+=invs[i].profit;}
+  $('prf-al-c').innerHTML='<div style="background:#ebf5ff;border-radius:6px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between"><div><div style="font-size:11px;color:#6b7280">All Sales</div><div style="font-weight:700;color:#1a56db">'+Rs(as)+'</div></div><div><div style="font-size:11px;color:#6b7280">All Profit</div><div style="font-weight:700;color:#057a55">'+Rs(ap)+'</div></div></div>'+(invs.length===0?'<div class="empty"><span class="ei">📊</span>No invoices yet</div>':invs.slice().reverse().map(row).join(''));
+}
+
+// CREDIT
+function rCredit(){
+  var crs=D.crs(), custs=D.custs();
+  var pend=crs.filter(function(c){return !c.paid;}), done=crs.filter(function(c){return c.paid;});
+  var out=0,rec=0; for(var i=0;i<pend.length;i++) out+=pend[i].amount; for(var i=0;i<done.length;i++) rec+=done[i].amount;
+  $('cr-out').textContent=Rs(out); $('cr-rec').textContent=Rs(rec);
+
+  var csH='<option value="">-- Select Customer --</option>';
+  for(var i=0;i<custs.length;i++) csH+='<option value="'+custs[i].id+'">'+custs[i].biz+'</option>';
+  $('cr-c').innerHTML=csH; $('py-c').innerHTML=csH;
+
+  if(pend.length===0){$('cr-list-c').innerHTML='<div class="empty"><span class="ei">✅</span>No pending credits!</div>';return;}
+  var byCust={};
+  for(var i=0;i<pend.length;i++){var cr=pend[i]; if(!byCust[cr.cid]) byCust[cr.cid]=[]; byCust[cr.cid].push(cr);}
+  var h='';
+  for(var cid in byCust){
+    var crs2=byCust[cid], c=null; for(var i=0;i<custs.length;i++){if(custs[i].id===cid){c=custs[i];break;}} if(!c)c={biz:'Unknown'};
+    var tot=0; for(var i=0;i<crs2.length;i++) tot+=crs2[i].amount;
+    h+='<div style="background:#fde8e8;border-radius:6px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+c.biz+'</b>'+(c.ph?'<div style="font-size:12px;color:#6b7280">'+c.ph+'</div>':'')+'</div><div style="text-align:right"><div style="font-weight:700;color:#c81e1e;font-size:16px">'+Rs(tot)+'</div><div style="font-size:11px;color:#6b7280">'+crs2.length+' entr'+(crs2.length>1?'ies':'y')+'</div></div></div>';
+    for(var i=0;i<crs2.length;i++) h+='<div style="border-top:1px solid rgba(200,30,30,.15);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#6b7280">'+(crs2[i].note||'Credit')+' • '+dl(crs2[i].date)+'</span><span style="font-weight:700">'+Rs(crs2[i].amount)+'</span></div>';
+    h+='</div>';
+  }
+  $('cr-list-c').innerHTML=h;
+}
+
+function saveCr(){
+  var cid=$('cr-c').value, amt=parseFloat($('cr-a').value)||0, date=$('cr-d').value||TODAY, due=$('cr-dd').value, note=$('cr-n').value||'Direct entry';
+  if(!cid){toast('⚠️ Select customer');return;} if(amt<=0){toast('⚠️ Enter amount');return;}
+  var crs=D.crs(); crs.push({id:'CR'+Date.now(),cid:cid,amount:amt,date:date,due:due,note:note,paid:false}); D.set('crs',crs);
+  $('cr-a').value=''; $('cr-n').value=''; $('cr-dd').value=''; $('cr-c').value='';
+  toast('✅ Credit entry saved!'); rCredit();
+}
+
+function showBal(){
+  var cid=$('py-c').value, div=$('py-bal');
+  if(!cid){div.style.display='none';return;}
+  var crs=D.crs(), bal=0;
+  for(var i=0;i<crs.length;i++) if(crs[i].cid===cid&&!crs[i].paid) bal+=crs[i].amount;
+  div.style.display='block';
+  if(bal>0){div.style.background='#fde8e8';div.style.color='#c81e1e';div.textContent='Outstanding: '+Rs(bal);}
+  else{div.style.background='#def7ec';div.style.color='#057a55';div.textContent='✅ No pending balance';}
+}
+
+function recvPay(){
+  var cid=$('py-c').value, amt=parseFloat($('py-a').value)||0, method=$('py-m').value;
+  if(!cid){toast('⚠️ Select customer');return;} if(amt<=0){toast('⚠️ Enter amount');return;}
+  var crs=D.crs(), pend=[];
+  for(var i=0;i<crs.length;i++) if(crs[i].cid===cid&&!crs[i].paid) pend.push(crs[i]);
+  if(pend.length===0){toast('⚠️ No pending credits for this customer');return;}
+  var rem=amt;
+  for(var i=0;i<crs.length;i++){
+    if(crs[i].cid!==cid||crs[i].paid||rem<=0) continue;
+    if(rem>=crs[i].amount){rem-=crs[i].amount;crs[i].paid=true;crs[i].method=method;}
+    else{crs[i].amount-=rem;rem=0;}
+  }
+  D.set('crs',crs);
+  $('py-a').value=''; $('py-c').value=''; $('py-bal').style.display='none';
+  toast('✅ Payment of '+Rs(amt)+' recorded!'); rCredit(); rDash();
+}
+
+// CUSTOMERS
+function rCusts(){
+  var custs=D.custs(), crs=D.crs(), invs=D.invs();
+  if(custs.length===0){$('cu-list-c').innerHTML='<div class="empty"><span class="ei">👥</span>No customers yet</div>';return;}
+  var h='';
+  for(var i=0;i<custs.length;i++){
+    var c=custs[i], debt=0, invCnt=0;
+    for(var j=0;j<crs.length;j++) if(crs[j].cid===c.id&&!crs[j].paid) debt+=crs[j].amount;
+    for(var j=0;j<invs.length;j++) if(invs[j].cid===c.id) invCnt++;
+    var bg=clr(c.biz);
+    h+='<div class="row" style="cursor:pointer" onclick="showCust(\''+c.id+'\')"><div style="display:flex;align-items:center;flex:1;min-width:0"><div class="av" style="background:'+bg+'22;color:'+bg+'">'+ini(c.biz)+'</div><div><div class="rn">'+c.biz+'</div><div class="rs">'+(c.ph||'')+' '+(c.city?'• '+c.city:'')+' • '+invCnt+' inv</div></div></div><div style="text-align:right">'+(debt>0?'<div style="font-weight:700;color:#c81e1e">'+Rs(debt)+'</div><div style="font-size:11px;color:#6b7280">due</div>':'<span class="badge bgreen">Clear</span>')+'</div></div>';
+  }
+  $('cu-list-c').innerHTML=h;
+}
+
+function saveCust(){
+  var biz=$('cb').value.trim(), name=$('cn').value.trim(), ph=$('cp').value.trim();
+  var city=$('cc').value.trim(), debt=parseFloat($('cd').value)||0, addr=$('ca').value.trim();
+  if(!biz){toast('⚠️ Enter business name');return;} if(!ph){toast('⚠️ Enter phone number');return;}
+  var custs=D.custs();
+  for(var i=0;i<custs.length;i++){if(custs[i].ph===ph){toast('⚠️ Phone already exists');return;}}
+  var nc={id:'C'+Date.now(),biz:biz,name:name,ph:ph,city:city,addr:addr};
+  custs.push(nc); D.set('custs',custs);
+  if(debt>0){var crs=D.crs(); crs.push({id:'CR'+Date.now(),cid:nc.id,amount:debt,date:TODAY,note:'Opening balance',paid:false}); D.set('crs',crs);}
+  $('cb').value='';$('cn').value='';$('cp').value='';$('cc').value='';$('cd').value='';$('ca').value='';
+  toast('✅ Customer saved!'); rCusts();
+}
+
+function showCust(id){
+  CUR_CUST=id;
+  var custs=D.custs(), c=null; for(var i=0;i<custs.length;i++){if(custs[i].id===id){c=custs[i];break;}} if(!c)return;
+  var invs=D.invs(), crs=D.crs(), myInvs=[], myCrs=[];
+  for(var i=0;i<invs.length;i++) if(invs[i].cid===id) myInvs.push(invs[i]);
+  for(var i=0;i<crs.length;i++) if(crs[i].cid===id&&!crs[i].paid) myCrs.push(crs[i]);
+  var tb=0,td=0; for(var i=0;i<myInvs.length;i++) tb+=myInvs[i].total; for(var i=0;i<myCrs.length;i++) td+=myCrs[i].amount;
+  $('m3t').textContent=c.biz;
+  var h='<div class="grid2" style="margin-bottom:12px"><div class="mbox"><div class="ml">Total Purchases</div><div class="mv blue">'+Rs(tb)+'</div></div><div class="mbox"><div class="ml">Outstanding</div><div class="mv red">'+Rs(td)+'</div></div><div class="mbox"><div class="ml">Invoices</div><div class="mv">'+myInvs.length+'</div></div><div class="mbox"><div class="ml">Credits</div><div class="mv">'+myCrs.length+'</div></div></div>';
+  if(c.ph) h+='<div style="padding:8px 0;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between"><span style="color:#6b7280">📞 Mobile</span><b>'+c.ph+'</b></div>';
+  if(c.city) h+='<div style="padding:8px 0;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between"><span style="color:#6b7280">🏙️ City</span><b>'+c.city+'</b></div>';
+  if(c.name) h+='<div style="padding:8px 0;display:flex;justify-content:space-between"><span style="color:#6b7280">👤 Owner</span><b>'+c.name+'</b></div>';
+  if(myInvs.length>0){
+    h+='<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:12px 0 8px">Recent Invoices</div>';
+    var rec=myInvs.slice(-3).reverse();
+    for(var i=0;i<rec.length;i++) h+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f3f4f6"><span>'+rec[i].id+' • '+dl(rec[i].date)+'</span><b>'+Rs(rec[i].total)+'</b></div>';
+  }
+  $('m3b').innerHTML=h; om('m3');
+}
+
+function delCust(){
+  if(!confirm('Delete customer? Credits will also be removed.'))return;
+  D.set('custs',D.custs().filter(function(c){return c.id!==CUR_CUST;}));
+  D.set('crs',D.crs().filter(function(c){return c.cid!==CUR_CUST;}));
+  cm('m3'); rCusts(); toast('🗑️ Deleted');
+}
+
+// INIT
+window.onload=function(){
+  $('idate').value=TODAY; $('cr-d').value=TODAY;
+  rInvForm(); rDash();
+};
+window.onclick=function(e){if(e.target.className==='mbg on')e.target.className='mbg';};
+</script>
+</body>
+</html>
